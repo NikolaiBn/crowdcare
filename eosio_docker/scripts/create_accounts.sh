@@ -27,3 +27,14 @@ jq -c '.[]' accounts.json | while read i; do
   # to simplify, we use the same key for owner and active key of each account
   cleos create account eosio $name $pub $pub
 done
+
+
+jq -c '.[]' tasks.json | while read i; do
+  name=$(jq -r '.name' <<< "$i")
+  note=$(jq -r '.note' <<< "$i")
+
+  # to simplify, we use the same key for owner and active key of each account
+  cleos create account eosio $name $pub $pub
+  cleos push action notechainacc update '{"name": $name, "note": $note}'
+
+done

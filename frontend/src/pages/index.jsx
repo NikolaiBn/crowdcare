@@ -13,6 +13,8 @@ import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 
 import Heart from './Heart';
+import Profile from './Profile';
+import './index.css';
 
 // NEVER store private keys in any source code in your real life development
 // This is for demo purposes only!
@@ -30,6 +32,9 @@ const accounts = [
 const styles = theme => ({
   card: {
     margin: 10,
+    width: '80%',
+    display: 'inline-block',
+    clear: 'both',
   },
   paper: {
     ...theme.mixins.gutters(),
@@ -45,19 +50,40 @@ const styles = theme => ({
     padding: 10,
     marginBottom: 0.
   },
+  heartStyle: {
+    float: 'left',
+  },
+  profile: {
+    float: 'right',
+  }
 });
 
 // Index component
 class Index extends Component {
-  let votes;
 
   constructor(props) {
     super(props)
     this.state = {
-      noteTable: [] // to store the table rows from smart contract
+      noteTable: [], // to store the table rows from smart contract
+      votesClicked: false,
+      votes: 78
     };
     this.handleFormEvent = this.handleFormEvent.bind(this);
-    votes = 0;
+
+    this.heartClicked = this.heartClicked.bind(this);
+    this.getVotes = this.getVotes.bind(this);
+  }
+
+  heartClicked(){
+    console.log("heart Clicked");
+    this.setState((prevState) => ({
+      votesClicked: !prevState.votesClicked,
+      votes: (prevState.votesClicked)?prevState.votes+1:prevState.votes-1
+    }));
+  }
+  getVotes(){
+    console.log("get votes");
+    return (this.votesClicked)?this.votes+1:this.votes;
   }
 
   // generic function to handle form events (e.g. "submit" / "reset")
@@ -129,22 +155,33 @@ class Index extends Component {
 
     // generate each note as a card
     const generateCard = (key, timestamp, user, note) => (
-      <Card className={classes.card} key={key}>
+      <div>
+      <Card className="{classes.card} mycard" key={key}>
         <CardContent>
-          <Typography variant="headline" component="h2">
+
+          <Typography variant="headline" component="h4" style={{fontSize:16}}>
             {user}
+          </Typography>
+
+          <Typography component="pre" style={{fontSize:20}}>
+            {note}
           </Typography>
           <Typography style={{fontSize:12}} color="textSecondary" gutterBottom>
             {new Date(timestamp*1000).toString()}
           </Typography>
-          <Typography component="pre">
-            {note}
-          </Typography>
+          <Heart heartCount={this.state.votes} onClick={this.heartClicked} className={classes.heartStyle}/>
+          <Button color="primary" onClick={()=>{alert('We have a trash problem on Bondi beach, specifically plastic bottles.');}}>DETAILS</Button>
+
+            <Profile className={`${classes.card} ${classes.profile}`}/>
         </CardContent>
       </Card>
+
+      </div>
     );
     let noteCards = noteTable.map((row, i) =>
       generateCard(i, row.timestamp, row.user, row.note));
+
+    let myvote = this.getVotes();
 
     return (
       <div>
@@ -155,8 +192,7 @@ class Index extends Component {
             </Typography>
           </Toolbar>
         </AppBar>
-        <Button color="primary" onClick={()=>{alert('ok clicked');}}>OK</Button>
-        <Heart heartCount={votes} />
+
         {noteCards}
         <Paper className={classes.paper}>
           <form onSubmit={this.handleFormEvent}>
